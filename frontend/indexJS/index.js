@@ -13,9 +13,9 @@ async function loadImages() {
 			colDiv.classList.add('col-6', 'mb-3');
 
 			const imgElement = document.createElement('img');
-			imgElement.src = `/images/${img}`;
+			imgElement.src = `/images/${img.filename}`;
 			imgElement.classList.add('img-fluid', 'rounded');
-			imgElement.alt = img;
+			imgElement.alt = img.filename;
 
 			colDiv.appendChild(imgElement);
 			gallery.appendChild(colDiv);

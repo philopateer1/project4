@@ -21,35 +21,52 @@ const app = (0, express_1.default)();
 const port = 3000;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+// Serve static files from public directory
 app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
-//generate images with width and height
+// Serve images statically from /images route
+app.use('/images', express_1.default.static(path_1.default.join(process.cwd(), 'images')));
 app.get("/api/:width/:height", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let width = req.params.width;
     let height = req.params.height;
     let url = `https://picsum.photos/${width}/${height}`;
-    const response = yield axios_1.default.get(url, { responseType: 'arraybuffer' });
-    const imageBuffer = Buffer.from(response.data, 'binary');
     const imagesDir = path_1.default.join(process.cwd(), 'images');
     yield fs_1.promises.mkdir(imagesDir, { recursive: true });
-    const timestamp = Date.now();
-    const imagePath = path_1.default.join(process.cwd(), 'images', `${width}x${height}-${timestamp}.jpg`);
-    yield fs_1.promises.writeFile(imagePath, imageBuffer);
+    const imagePath = path_1.default.join(imagesDir, `${width}x${height}.jpg`);
     try {
+        // Check if cached image exists
+        yield fs_1.promises.access(imagePath);
+        // If exists, read and serve it
+        const cachedImage = yield fs_1.promises.readFile(imagePath);
         res.writeHead(200, {
             'Content-Type': 'image/jpg',
-            'Content-Length': imageBuffer.length,
+            'Content-Length': cachedImage.length,
         });
-        res.end(imageBuffer);
+        res.end(cachedImage);
     }
-    catch (error) {
-        res.status(500).send('Error fetching the image');
+    catch (_a) {
+        // If not exists, fetch from picsum.photos
+        try {
+            const response = yield axios_1.default.get(url, { responseType: 'arraybuffer' });
+            const imageBuffer = Buffer.from(response.data, 'binary');
+            yield fs_1.promises.writeFile(imagePath, imageBuffer);
+            res.writeHead(200, {
+                'Content-Type': 'image/jpg',
+                'Content-Length': imageBuffer.length,
+            });
+            res.end(imageBuffer);
+        }
+        catch (error) {
+            res.status(500).send('Error fetching the image');
+        }
     }
 }));
 app.get("/api/images", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const imagesDir = path_1.default.join(process.cwd(), 'images');
         const files = yield fs_1.promises.readdir(imagesDir);
-        res.json(files);
+        // Return array of objects with filename only for now
+        const response = files.map(file => ({ filename: file }));
+        res.json(response);
     }
     catch (error) {
         res.status(500).json({ error: "Failed to read images directory" });
@@ -61,18 +78,20 @@ const storage = multer_1.default.diskStorage({
         cb(null, path_1.default.join(process.cwd(), 'images'));
     },
     filename: function (req, file, cb) {
-        const name = file.originalname.split(".")[0] + `-${Date.now()}`;
+        const name = file.originalname.split(".")[0];
         cb(null, name + ".jpg");
     }
 });
 const upload = (0, multer_1.default)({ storage: storage });
-app.post("/api/upload", upload.single("photo"), (req, res, next) => {
+app.post("/api/upload", upload.single("photo"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         res.status(400).json({ error: "No file uploaded" });
         return;
     }
+    // After upload, optionally resize the image to a default size or keep original
+    // For now, just respond with filename
     res.json({ filename: req.file.filename });
-});
+}));
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
