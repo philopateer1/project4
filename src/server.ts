@@ -5,7 +5,7 @@ import path from "path";
 import cors from "cors";
 import { resizeImage } from './imageProcessor';
 
-const app = express();
+export const app = express();
 const port = 3000;
 
 app.use(cors());

@@ -12,20 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
-const app = (0, express_1.default)();
+exports.app = (0, express_1.default)();
 const port = 3000;
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
+exports.app.use((0, cors_1.default)());
+exports.app.use(express_1.default.json());
 // Serve static files from public directory
-app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
+exports.app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
 // Serve images statically from /images route
-app.use('/images', express_1.default.static(path_1.default.join(process.cwd(), 'images')));
-app.get("/api/:width/:height", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.app.use('/images', express_1.default.static(path_1.default.join(process.cwd(), 'images')));
+exports.app.get("/api/:width/:height", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let width = req.params.width;
     let height = req.params.height;
     let url = `https://picsum.photos/${width}/${height}`;
@@ -60,7 +61,7 @@ app.get("/api/:width/:height", (req, res) => __awaiter(void 0, void 0, void 0, f
         }
     }
 }));
-app.get("/api/images", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.app.get("/api/images", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const imagesDir = path_1.default.join(process.cwd(), 'images');
         const files = yield fs_1.promises.readdir(imagesDir);
@@ -83,7 +84,7 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage });
-app.post("/api/upload", upload.single("photo"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.app.post("/api/upload", upload.single("photo"), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         res.status(400).json({ error: "No file uploaded" });
         return;
@@ -92,6 +93,6 @@ app.post("/api/upload", upload.single("photo"), (req, res, next) => __awaiter(vo
     // For now, just respond with filename
     res.json({ filename: req.file.filename });
 }));
-app.listen(port, () => {
+exports.app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
