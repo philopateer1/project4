@@ -1,9 +1,10 @@
 import request from 'supertest';
-import { app } from '../src/server';
+import { app } from '../server';
 import path from 'path';
 import * as fs from 'fs/promises';
 import axios from 'axios';
 import jasmine from 'jasmine';
+import { resizeImage } from '../imageProcessor';
 
 describe('Server API Endpoints', () => {
   describe('GET /api/:width/:height', () => {
@@ -57,6 +58,31 @@ describe('Server API Endpoints', () => {
       expect(res.status).toBe(500);
       expect(res.text).toBe('Error fetching the image');
     });
+
+    it('should fetch, cache and serve a real image', async () => {
+      const width = '350';
+      const height = '350';
+      const imagePath = path.join(process.cwd(), 'images', `${width}x${height}.jpg`);
+
+      // Clean up before test if file exists
+      try {
+        await fs.unlink(imagePath);
+      } catch {}
+
+      const res = await request(app).get(`/api/${width}/${height}`);
+
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('image/jpg');
+      expect(res.body.length).toBeGreaterThan(0);
+
+      // Check that the image file was saved
+      const fileStat = await fs.stat(imagePath);
+      expect(fileStat.isFile()).toBeTrue();
+      expect(fileStat.size).toBeGreaterThan(0);
+
+      // Clean up after test
+      await fs.unlink(imagePath);
+    });
   });
 
   describe('GET /api/images', () => {
@@ -89,13 +115,37 @@ describe('Server API Endpoints', () => {
       expect(res.body).toEqual({ error: 'No file uploaded' });
     });
 
-    /*
-    // Note: Testing file upload with multer requires integration testing or more complex mocking.
-    // Here we test the happy path assuming multer works correctly.
-    it('should return filename if file uploaded', async () => {
-      // This test requires integration or e2e testing with actual file upload.
-      // Placeholder for future implementation.
+  
+  })
+
+  describe('resizeImage function', () => {
+    const inputImage = path.join(process.cwd(), 'images', '300x300.jpg');
+    const outputImage = path.join(process.cwd(), 'images', 'test-resized.jpg');
+
+    afterEach(async () => {
+      // Clean up output file after each test
+      try {
+        await fs.unlink(outputImage);
+      } catch {}
     });
-    */
+
+    it('should resize the image and save to output path', async () => {
+      const width = 100;
+      const height = 100;
+
+      await resizeImage(inputImage, outputImage, width, height);
+
+      const stat = await fs.stat(outputImage);
+      expect(stat.isFile()).toBeTrue();
+      expect(stat.size).toBeGreaterThan(0);
+    });
+
+    it('should throw an error for invalid input path', async () => {
+      const invalidInput = path.join(process.cwd(), 'images', 'nonexistent.jpg');
+      const width = 100;
+      const height = 100;
+
+      await expectAsync(resizeImage(invalidInput, outputImage, width, height)).toBeRejectedWithError();
+    });
   });
-});
+})
