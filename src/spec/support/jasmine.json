@@ -1,8 +1,10 @@
 {
     "spec_dir":"src/spec",
-    "spec_files": ["**/*[sS]pec.ts"
+    "spec_files": ["**/*[sS]pec.ts"],
+    "helpers": [
+        "helpers/ts-node-register.ts",
+        "helpers/**/*.ts"
     ],
-    "helpers": ["helpers/**/*.ts"],
     "env":{
         "stopSpecOnExpectaionFailure":false,
         "random": false

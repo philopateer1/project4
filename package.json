@@ -20,9 +20,9 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0"
   },
-  "scripts": {
+"scripts": {
     "build": "tsc",
-    "test": "jasmine-ts",
+"test": "jasmine --config=src/spec/support/jasmine.json",
     "start:dev": "nodemon ./src/main.ts",
     "start": "node ./src/main.ts"
   },
