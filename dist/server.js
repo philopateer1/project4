@@ -20,10 +20,8 @@ const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
 exports.app = (0, express_1.default)();
 const port = 3000;
-exports.app.use((0, cors_1.default)());
-exports.app.use(express_1.default.json());
+exports.app.use([(0, cors_1.default)(), express_1.default.json(), express_1.default.static(path_1.default.join(__dirname, "public"))]);
 // Serve static files from public directory
-exports.app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
 // Serve images statically from /images route
 exports.app.use('/images', express_1.default.static(path_1.default.join(process.cwd(), 'images')));
 exports.app.get("/api/:width/:height", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
