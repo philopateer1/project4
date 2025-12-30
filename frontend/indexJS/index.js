@@ -56,7 +56,7 @@ photoForm.addEventListener('submit', async event => {
 	}
 
 	if (file.type !== 'image/jpeg' && file.type !== 'image/jpg') {
-		alert('Only JPG images are allowed.');
+		alert('Only JPG/JPEG images are allowed.');
 		return;
 	}
 
