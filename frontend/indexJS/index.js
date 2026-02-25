@@ -13,7 +13,7 @@ async function loadImages() {
 			colDiv.classList.add('col-6', 'mb-3');
 
 			const imgElement = document.createElement('img');
-			imgElement.src = `/images/${img.filename}`;
+			imgElement.src = `http://localhost:3000/images/${img.filename}`;
 			imgElement.classList.add('img-fluid', 'rounded');
 			imgElement.alt = img.filename;
 
@@ -81,7 +81,7 @@ photoForm.addEventListener('submit', async event => {
 		const colDiv = document.createElement('div');
 		colDiv.classList.add('col-6', 'mb-3');
 		const imgElement = document.createElement('img');
-		imgElement.src = `/images/${newImageName}`;
+		imgElement.src = `http://localhost:3000/images/${newImageName}`;
 		imgElement.classList.add('img-fluid', 'rounded');
 		imgElement.alt = newImageName;
 

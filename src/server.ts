@@ -8,8 +8,13 @@ import { resizeImage } from './imageProcessor';
 export const app = express();
 const port = 3000;
 
-app.use([cors(),express.json(),express.static(path.join(__dirname,"public"))]);
-// Serve static files from public directory
+app.use([cors(),express.json()]);
+// Serve static files from frontend directory
+app.use(express.static(path.join(process.cwd(), 'frontend')));
+// Serve index.html for root path
+app.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'frontend', 'index.html'));
+});
 // Serve images statically from /images route
 app.use('/images', express.static(path.join(process.cwd(),'images')));
 
